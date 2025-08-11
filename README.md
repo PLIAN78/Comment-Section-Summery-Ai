@@ -136,7 +136,7 @@ npm run dev
 ##  Thanks
 
 Thanks for checking out the project!
-Feel free to submit feedback or ideas for improvements.
+Feel free to submit feedback or ideas for improvements. Peter.L(2025/8/11)
 
 
 
