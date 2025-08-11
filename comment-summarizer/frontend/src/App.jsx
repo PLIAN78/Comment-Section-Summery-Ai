@@ -1,66 +1,68 @@
-import { useState, useEffect } from "react";
+"use client"
+
+import { useState, useEffect } from "react"
 
 function App() {
-  const [videoId, setVideoId] = useState("");
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [videoId, setVideoId] = useState("")
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const fetchComments = async () => {
     if (!videoId.trim()) {
-      setError("Please enter a YouTube URL or Video ID");
-      return;
+      setError("Please enter a YouTube URL or Video ID")
+      return
     }
 
-    setLoading(true);
-    setError("");
-    setData(null);
+    setLoading(true)
+    setError("")
+    setData(null)
 
     try {
-      const encodedUrl = encodeURIComponent(videoId);
-      const res = await fetch(`http://127.0.0.1:8000/comments?video_id=${encodedUrl}`);
-      const responseData = await res.json();
+      const encodedUrl = encodeURIComponent(videoId)
+      const res = await fetch(`http://127.0.0.1:8000/comments?video_id=${encodedUrl}`)
+      const responseData = await res.json()
 
       if (responseData.status === "error") {
-        setError(responseData.error || "Failed to fetch comments");
+        setError(responseData.error || "Failed to fetch comments")
       } else {
-        setData(responseData);
+        setData(responseData)
       }
     } catch (err) {
-      console.error("Error fetching comments:", err);
-      setError("Network error. Make sure your backend is running.");
+      console.error("Error fetching comments:", err)
+      setError("Network error. Make sure your backend is running.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
-      fetchComments();
+      fetchComments()
     }
-  };
+  }
 
   // Category metadata
   const getCategoryInfo = (category) => {
     const info = {
-      Regular: { icon: "💬", color: "#28a745", label: "General Engagement" },
+      Regular: {  color: "#28a745", label: "General Engagement" },
       Questions: { icon: "❓", color: "#007bff", label: "Audience Questions" },
       Requests: { icon: "🙋", color: "#ffc107", label: "Requests & Suggestions" },
       Concerning: { icon: "⚠️", color: "#dc3545", label: "Concerning Feedback" },
-    };
-    return info[category] || { icon: "📝", color: "#6c757d", label: "Other" };
-  };
+    }
+    return info[category] || { icon: "📝", color: "#6c757d", label: "Other" }
+  }
 
   // Format date
   const formatDate = (isoDate) => {
-    return new Date(isoDate).toLocaleDateString();
-  };
+    return new Date(isoDate).toLocaleDateString()
+  }
 
   // Reusable function to render small category cards
   const renderCategoryCard = (category) => {
-    const { icon, color, label } = getCategoryInfo(category);
-    const comments = data.comments_by_category?.[category] || [];
-    const limitedComments = comments.slice(0, 8); // Show max 8
+    const { icon, color, label } = getCategoryInfo(category)
+    const comments = data.comments_by_category?.[category] || []
+    const limitedComments = comments.slice(0, 8) // Show max 8
 
     return (
       <div key={category} className="category-card">
@@ -76,28 +78,26 @@ function App() {
                 <div className="comment-meta">
                   <span>👍 {comment.likes}</span>
                 </div>
-                <div className="comment-text" style={{ fontSize: '0.9rem' }}>
-                  {comment.text.length > 100 ? comment.text.slice(0, 100) + '...' : comment.text}
+                <div className="comment-text" style={{ fontSize: "0.9rem" }}>
+                  {comment.text.length > 100 ? comment.text.slice(0, 100) + "..." : comment.text}
                 </div>
               </div>
             ))
           ) : (
-            <div style={{ color: '#888', fontSize: '0.85rem', fontStyle: 'italic' }}>
-              None
-            </div>
+            <div style={{ color: "#888", fontSize: "0.85rem", fontStyle: "italic" }}>None</div>
           )}
-          <div style={{ textAlign: 'center', fontSize: '0.85rem', marginTop: '8px', color: '#6c757d' }}>
-            {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
+          <div style={{ textAlign: "center", fontSize: "0.85rem", marginTop: "8px", color: "#6c757d" }}>
+            {comments.length} {comments.length === 1 ? "comment" : "comments"}
           </div>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   // Auto-focus input on load
   useEffect(() => {
-    document.getElementById("video-input")?.focus();
-  }, []);
+    document.getElementById("video-input")?.focus()
+  }, [])
 
   return (
     <>
@@ -114,6 +114,8 @@ function App() {
             background-color: #f7f9fc;
             color: #333;
             line-height: 1.6;
+            width: 100%;
+            overflow-x: hidden;
           }
 
           @keyframes fadeIn {
@@ -122,10 +124,16 @@ function App() {
           }
 
           .container {
+            width: 100%;
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             animation: fadeIn 0.5s ease-in;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
           }
 
           .header {
@@ -136,6 +144,8 @@ function App() {
             border-radius: 16px;
             margin-bottom: 30px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 1200px;
           }
 
           .header h1 {
@@ -156,6 +166,8 @@ function App() {
             justify-content: center;
             margin-bottom: 30px;
             flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
           }
 
           .input-section input {
@@ -208,6 +220,8 @@ function App() {
             margin-bottom: 24px;
             font-weight: 500;
             text-align: center;
+            width: 100%;
+            max-width: 1200px;
           }
 
           .ai-summary {
@@ -217,6 +231,8 @@ function App() {
             margin-bottom: 30px;
             border-left: 5px solid #1976d2;
             box-shadow: 0 4px 15px rgba(25, 118, 210, 0.15);
+            width: 100%;
+            max-width: 1200px;
           }
 
           .ai-summary h3 {
@@ -236,6 +252,29 @@ function App() {
             white-space: pre-wrap;
           }
 
+          .category-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1200px;
+          }
+
+          @media (max-width: 1200px) {
+            .category-grid {
+              grid-template-columns: 1fr 1fr;
+              gap: 16px;
+            }
+          }
+
+          @media (max-width: 768px) {
+            .category-grid {
+              grid-template-columns: 1fr;
+              gap: 16px;
+            }
+          }
+
           .category-card {
             background: white;
             border-radius: 16px;
@@ -243,6 +282,7 @@ function App() {
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             border: 1px solid #eee;
             transition: transform 0.3s, box-shadow 0.3s;
+            min-width: 0; /* Prevents grid overflow */
           }
 
           .category-card:hover {
@@ -305,6 +345,7 @@ function App() {
 
           .comment-text {
             color: #495057;
+            word-wrap: break-word;
           }
 
           .empty-state {
@@ -315,6 +356,8 @@ function App() {
             border: 2px dashed #ccc;
             color: #6c757d;
             margin-bottom: 30px;
+            width: 100%;
+            max-width: 1200px;
           }
 
           .empty-state h3 {
@@ -333,6 +376,8 @@ function App() {
             padding: 50px;
             color: #1a2a6c;
             font-size: 1.2rem;
+            width: 100%;
+            max-width: 1200px;
           }
 
           .loading span {
@@ -344,6 +389,103 @@ function App() {
           @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+          }
+
+          .topics-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1200px;
+          }
+
+          .topics-section h3 {
+            color: #1a2a6c;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .topics-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+          }
+
+          .topic-tag {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: 1px solid #bbdefb;
+          }
+
+          .topic-tag span {
+            opacity: 0.7;
+          }
+
+          .about-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1200px;
+          }
+
+          .about-section h3 {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .about-section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+            text-align: left;
+          }
+
+          .about-section p:last-child {
+            margin-bottom: 0;
+          }
+
+          .footer {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 16px 16px 0 0;
+            margin-top: 40px;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+          }
+
+          .footer-content p {
+            margin: 0;
+            font-size: 1rem;
+          }
+
+          .footer-tagline {
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 8px !important;
+            font-size: 0.9rem !important;
           }
         `}
       </style>
@@ -372,11 +514,7 @@ function App() {
         </div>
 
         {/* Error */}
-        {error && (
-          <div className="error">
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div className="error">⚠️ {error}</div>}
 
         {/* Loading */}
         {loading && (
@@ -397,30 +535,22 @@ function App() {
         {/* AI Summary */}
         {data?.ai_summary && (
           <div className="ai-summary">
-            <h3>🤖 AI-Powered Summary</h3>
+            <h3> AI-Powered Summary Gemini 1.5 Flash</h3>
             <p>{data.ai_summary}</p>
           </div>
         )}
 
-        {/* Category Grid - Enhanced Layout */}
+        {/* Category Grid - Fixed Layout */}
         {data && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr',
-            gap: '20px',
-            marginBottom: '30px',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            paddingBottom: '10px'
-          }}>
-            {/* 💬 Regular - General Engagement (Larger Card) */}
+          <div className="category-grid">
+            {/*  Regular - General Engagement (Larger Card) */}
             {(() => {
-              const category = "Regular";
-              const { icon, color, label } = getCategoryInfo(category);
-              const comments = data.comments_by_category?.[category] || [];
+              const category = "Regular"
+              const { icon, color, label } = getCategoryInfo(category)
+              const comments = data.comments_by_category?.[category] || []
 
               return (
-                <div key={category} className="category-card" style={{ minWidth: '400px' }}>
+                <div key={category} className="category-card">
                   <div className="category-header" style={{ backgroundColor: color }}>
                     {icon} {category}
                     <span className="label">{label}</span>
@@ -438,16 +568,14 @@ function App() {
                         </div>
                       ))
                     ) : (
-                      <div style={{ color: '#888', fontStyle: 'italic' }}>
-                        No general engagement comments found.
-                      </div>
+                      <div style={{ color: "#888", fontStyle: "italic" }}>No general engagement comments found.</div>
                     )}
-                    <div style={{ textAlign: 'center', fontSize: '0.9rem', marginTop: '10px', color: '#6c757d' }}>
+                    <div style={{ textAlign: "center", fontSize: "0.9rem", marginTop: "10px", color: "#6c757d" }}>
                       {comments.length} total regular comments
                     </div>
                   </div>
                 </div>
-              );
+              )
             })()}
 
             {/* ❓ Questions */}
@@ -463,52 +591,53 @@ function App() {
 
         {/* Top Topics Section */}
         {data?.analysis?.top_keywords && data.analysis.top_keywords.length > 0 && (
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '25px',
-            marginBottom: '30px',
-            border: '1px solid #dee2e6',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-          }}>
-            <h3 style={{
-              color: '#1a2a6c',
-              marginBottom: '16px',
-              fontSize: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              🔍 Top Comment Topics & Keywords
-            </h3>
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              marginTop: '10px'
-            }}>
+          <div className="topics-section">
+            <h3>🔍 Top Comment Topics & Keywords</h3>
+            <div className="topics-tags">
               {data.analysis.top_keywords.map(([word, count], index) => (
-                <span
-                  key={index}
-                  style={{
-                    backgroundColor: '#e3f2fd',
-                    color: '#1976d2',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
-                    border: '1px solid #bbdefb'
-                  }}
-                >
-                  #{word} <span style={{ opacity: 0.7 }}>({count})</span>
+                <span key={index} className="topic-tag">
+                  #{word} <span>({count})</span>
                 </span>
               ))}
             </div>
           </div>
         )}
+
+        {/* About Section */}
+        <div className="about-section">
+          <h3> Our Mission</h3>
+          <p>
+            As a creator <a href="https://peterlian.com">myself</a>, I've witnessed countless talented individuals struggle to truly understand and connect with their audiences. 
+            The gap between content creators and their communities often leads to missed opportunities, decreased engagement, and ultimately, 
+            creators feeling disconnected from the very people they're trying to serve.
+          </p>
+          <p>
+            KnowYouFans was born from this personal experience and observation. I realized that while creators pour their hearts into content, 
+            they often lack the tools to deeply understand what their audience truly thinks, wants, and needs. Traditional analytics tell us 
+            the "what" but not the "why" behind audience behavior.
+          </p>
+          <p>
+            This YouTube comment analyzer is just the beginning. Our vision extends far beyond a single platform – we're building towards 
+            comprehensive audience intelligence across TikTok, WeChat, Instagram, and all major social platforms. YouTube serves as our 
+            proving ground, the first door we're opening in a much larger ecosystem of creator-audience understanding.
+          </p>
+          <p>
+            Every creator deserves to know their fans. Every audience deserves to be truly heard. KnowYouFans bridges that gap with 
+            AI-powered insights that transform raw comments into actionable intelligence, helping creators build stronger, more meaningful 
+            connections with their communities.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <p>© 2025 KnowYouFans. All rights reserved.</p>
+            <p className="footer-tagline">Empowering creators to truly know their audiences.</p>
+          </div>
+        </footer>
       </div>
     </>
-  );
+  )
 }
 
-export default App;
+export default App
