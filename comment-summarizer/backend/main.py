@@ -19,7 +19,7 @@ from typing import List, Dict
 nltk.download('punkt')
 nltk.download('stopwords')
 
-# Load environment variables
+# load environment variables
 load_dotenv()
 
 app = FastAPI()
@@ -37,15 +37,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Get API keys from environment
-YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-
 # Initialize Gemini
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Use the latest stable model version
     gemini_model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Load sentiment analysis model with truncation enabled
@@ -57,18 +51,10 @@ sentiment_model = pipeline(
     max_length=512
 )
 
-# ---------- Gemini Comment Categorization ----------
+# Gemini Comment Categorization 
 
 def categorize_comments_with_gemini(comments: List[Dict], batch_size: int = 25) -> List[Dict]:
-    """
-    Categorize comments using Gemini API in batches for efficiency
-    
-    Categories:
-    - Regular: General comments, reactions, opinions
-    - Questions: Direct questions to creator or about content
-    - Requests: Suggestions, requests for future content, collaboration asks
-    - Concerning: Negative criticism, complaints, concerning statements
-    """
+
     if not GEMINI_API_KEY:
         print("Gemini API key not found. Falling back to basic categorization.")
         return categorize_comments_basic(comments)
@@ -104,15 +90,7 @@ def categorize_batch_with_gemini(comments_batch: List[Dict]) -> List[Dict]:
         comments_text += f"{i+1}. \"{text}\"\n"
     
     prompt = f"""
-Analyze these YouTube comments and categorize each one into exactly ONE of these categories:
 
-**Categories:**
-- Regular: General comments, reactions, praise, opinions, discussions about the content
-- Questions: Direct questions to the creator or about the content (contains question words or question marks)
-- Requests: Suggestions for future content, collaboration requests, asking creator to do something specific
-- Concerning: Negative criticism, complaints, hate, spam, concerning or inappropriate statements
-
-**Comments to categorize:**
 {comments_text}
 
 **Instructions:**
@@ -144,7 +122,7 @@ JSON Response:
         raise e
 
 def parse_gemini_response(response_text: str, expected_count: int) -> Dict[str, str]:
-    """Parse Gemini JSON response and extract category mappings"""
+    
     categories = {}
     valid_categories = {"Regular", "Questions", "Requests", "Concerning"}
     
@@ -181,17 +159,16 @@ def parse_gemini_response(response_text: str, expected_count: int) -> Dict[str, 
     return categories
 
 def parse_gemini_fallback(response_text: str, expected_count: int) -> Dict[str, str]:
-    """Fallback parsing method for non-JSON responses"""
     categories = {}
     valid_categories = {"Regular", "Questions", "Requests", "Concerning"}
     
     try:
-        # Look for patterns like "1": "Regular" or 1: Regular
+       
         import re
         patterns = [
-            r'"?(\d+)"?\s*:\s*"(\w+)"',  # "1": "Regular"
-            r'(\d+):\s*(\w+)',           # 1: Regular
-            r'(\d+)\.\s*(\w+)',          # 1. Regular
+            r'"?(\d+)"?\s*:\s*"(\w+)"',  
+            r'(\d+):\s*(\w+)',          
+            r'(\d+)\.\s*(\w+)',          
         ]
         
         for pattern in patterns:
@@ -202,7 +179,7 @@ def parse_gemini_fallback(response_text: str, expected_count: int) -> Dict[str, 
                 if category in valid_categories and 1 <= int(index) <= expected_count:
                     categories[index] = category
             
-            if len(categories) >= expected_count * 0.5:  # If we got at least half
+            if len(categories) >= expected_count * 0.5:  
                 break
         
         # Fill in missing categories
@@ -242,7 +219,7 @@ def categorize_comments_basic(comments: List[Dict]) -> List[Dict]:
     return comments
 
 def generate_category_summary(categorized_comments: List[Dict]) -> Dict:
-    """Generate summary statistics for categorized comments"""
+    #Generate summary statistics for categorized comments
     category_counts = {"Regular": 0, "Questions": 0, "Requests": 0, "Concerning": 0}
     category_examples = {"Regular": [], "Questions": [], "Requests": [], "Concerning": []}
     
@@ -268,12 +245,10 @@ def generate_category_summary(categorized_comments: List[Dict]) -> Dict:
         "total_analyzed": total
     }
 
-# ---------- AI Summary Generation ----------
+# AI Summary Generation 
 
 def generate_ai_summary(categorized_comments: List[Dict], category_summary: Dict) -> str:
-    """
-    Generate an AI summary of the comment section using Gemini
-    """
+   
     if not GEMINI_API_KEY:
         return generate_basic_summary(category_summary)
     
@@ -339,7 +314,7 @@ For detailed insights, please ensure you have a valid Gemini API key configured.
     return summary.strip()
 
 def format_sample_comments(samples: Dict) -> str:
-    """Format sample comments for the prompt"""
+    #Format sample comments for the prompt
     formatted = ""
     for category, comments in samples.items():
         if comments:
@@ -348,10 +323,10 @@ def format_sample_comments(samples: Dict) -> str:
                 formatted += f"  {i}. \"{comment}\"\n"
     return formatted
 
-# ---------- Utility Functions ----------
+# Utility Function
 
 def extract_video_id(url: str) -> str:
-    """Extracts YouTube video ID using multiple formats."""
+    #Extracts YouTube video ID using multiple formats.
     url = url.strip()
 
     if "v=" in url:
@@ -380,7 +355,6 @@ def extract_video_id(url: str) -> str:
     return None
 
 def clean_comment_text(text: str) -> str:
-    """Clean HTML entities and tags from comment text."""
     if not text:
         return ""
     
@@ -391,7 +365,6 @@ def clean_comment_text(text: str) -> str:
     return text
 
 def truncate_text(text: str, max_chars: int = 500) -> str:
-    """Truncate text to a reasonable length for sentiment analysis."""
     if len(text) <= max_chars:
         return text
     return text[:max_chars] + "..."
@@ -455,7 +428,7 @@ def extract_keywords(comments, top_n=15):
         return []    
    
 
-# ---------- API Endpoints ----------
+# API Endpoints 
 
 @app.get("/comments")
 def get_comments(
@@ -514,7 +487,7 @@ def get_comments_by_id(
 
     return fetch_comments(video_id, max_comments, use_gemini)
 
-# ---------- Main Fetch Function ----------
+#  Main Fetch Function 
 
 def fetch_comments(video_id: str, max_comments: int = 500, use_gemini: bool = True):
     """Fetch YouTube comments with pagination and Gemini categorization"""
