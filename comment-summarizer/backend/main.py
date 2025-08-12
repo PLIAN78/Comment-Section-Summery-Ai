@@ -15,7 +15,7 @@ import google.generativeai as genai
 import json
 from typing import List, Dict
 
-# Download NLTK data
+# dowlaodd NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -24,12 +24,12 @@ load_dotenv()
 
 app = FastAPI()
 
-# Get API keys from environment
+# get API keys from environment
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 
-# Add CORS middleware
+# addd CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"],
@@ -42,7 +42,7 @@ if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     gemini_model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Load sentiment analysis model with truncation enabled
+# Load sentiment analysis model
 sentiment_model = pipeline(
     "sentiment-analysis",
     model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
@@ -64,7 +64,7 @@ def categorize_comments_with_gemini(comments: List[Dict], batch_size: int = 25) 
     
     categorized_comments = []
     
-    # Process comments in batches to manage API costs and rate limits
+    # 0rocess comments  manage API costs and rate limits
     for i in range(0, len(comments), batch_size):
         batch = comments[i:i + batch_size]
         try:
@@ -82,10 +82,10 @@ def categorize_comments_with_gemini(comments: List[Dict], batch_size: int = 25) 
 def categorize_batch_with_gemini(comments_batch: List[Dict]) -> List[Dict]:
     """Categorize a batch of comments using Gemini"""
     
-    # Prepare the prompt with all comments in the batch
+    # prepare the prompt with all comments in the batch
     comments_text = ""
     for i, comment in enumerate(comments_batch):
-        # Truncate very long comments to save tokens
+        # truncate very long comments to save tokens
         text = comment['text'][:300] + "..." if len(comment['text']) > 300 else comment['text']
         comments_text += f"{i+1}. \"{text}\"\n"
     
@@ -107,10 +107,10 @@ JSON Response:
         response = gemini_model.generate_content(prompt)
         result_text = response.text.strip()
         
-        # Parse the JSON response
+       
         categories = parse_gemini_response(result_text, len(comments_batch))
         
-        # Apply categories to comments
+        # apply categories to comments
         for i, comment in enumerate(comments_batch):
             category = categories.get(str(i + 1), "Regular")  # Default to Regular if parsing fails
             comment["category"] = category
@@ -127,7 +127,7 @@ def parse_gemini_response(response_text: str, expected_count: int) -> Dict[str, 
     valid_categories = {"Regular", "Questions", "Requests", "Concerning"}
     
     try:
-        # Clean the response text to extract JSON
+        #clean the response text to extract JSON
         json_start = response_text.find('{')
         json_end = response_text.rfind('}') + 1
         
@@ -135,12 +135,12 @@ def parse_gemini_response(response_text: str, expected_count: int) -> Dict[str, 
             json_text = response_text[json_start:json_end]
             parsed = json.loads(json_text)
             
-            # Validate and clean the parsed data
+            # validate and clean the parsed data
             for key, value in parsed.items():
                 if isinstance(key, (str, int)) and value in valid_categories:
                     categories[str(key)] = value
         
-        # Fill in missing categories with "Regular"
+        # fill in missing categories with "Regular"
         for i in range(1, expected_count + 1):
             if str(i) not in categories:
                 categories[str(i)] = "Regular"
@@ -245,8 +245,7 @@ def generate_category_summary(categorized_comments: List[Dict]) -> Dict:
         "total_analyzed": total
     }
 
-# AI Summary Generation 
-
+# aI Summary Generation 
 def generate_ai_summary(categorized_comments: List[Dict], category_summary: Dict) -> str:
    
     if not GEMINI_API_KEY:
@@ -323,7 +322,7 @@ def format_sample_comments(samples: Dict) -> str:
                 formatted += f"  {i}. \"{comment}\"\n"
     return formatted
 
-# Utility Function
+# utility Function
 
 def extract_video_id(url: str) -> str:
     #Extracts YouTube video ID using multiple formats.
