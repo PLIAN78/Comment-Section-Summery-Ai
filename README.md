@@ -16,7 +16,7 @@ It fetches comments from a given YouTube video and uses **Google Gemini 1.5 Flas
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 **Frontend**
 
