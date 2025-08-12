@@ -29,7 +29,7 @@ It fetches comments from a given YouTube video and uses **Google Gemini 1.5 Flas
 * Python (FastAPI or Flask)
 * YouTube Data API v3
 * Google Gemini 1.5 Flash API
-
+* Currently Hosting with Render
 ---
 
 ##  Project Structure
