@@ -1,7 +1,7 @@
 
 # YouTube Comment Section Summarizer
 
-A web application that helps YouTube creators quickly understand what their audience is saying.
+This is a web application that helps YouTube creators quickly understand what their audience is saying.
 It fetches comments from a given YouTube video and uses **Google Gemini 1.5 Flash** to summarize viewer sentiment, key topics, and feedback.
 
 ---
@@ -16,20 +16,20 @@ It fetches comments from a given YouTube video and uses **Google Gemini 1.5 Flas
 
 ---
 
-##  Tech Stack
+##  Tech Stacks
 
 **Frontend**
 
 * React (Vite)
 * Axios for API requests
-* Tailwind CSS *(optional)*
+* CSS 
 
 **Backend**
 
-* Python (FastAPI or Flask)
+* Python (FastAPI)
 * YouTube Data API v3
 * Google Gemini 1.5 Flash API
-* Currently Hosting with Render
+* Currently not hosting due to budget
 ---
 
 ##  Project Structure
@@ -91,7 +91,7 @@ npm run dev
 
 ##  How It Works
 
-1. User enters a YouTube video URL in the frontend.
+1. Users enters a YouTube video URL in the frontend.
 2. Frontend sends the URL to the backend via an API request.
 3. Backend uses the YouTube Data API v3 to fetch the video’s comments.
 4. Gemini 1.5 Flash processes the comments and generates:
