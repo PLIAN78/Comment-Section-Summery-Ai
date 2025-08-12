@@ -5,4 +5,5 @@ google-api-python-client
 python-dotenv
 transformers
 nltk
+torch
 google-generativeai
