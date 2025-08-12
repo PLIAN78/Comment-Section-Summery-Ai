@@ -50,14 +50,14 @@ It fetches comments from a given YouTube video and uses **Google Gemini 1.5 Flas
 
 ##  Setup
 
-### 1️⃣ Clone the Repository
+###  Clone the Repository
 
 ```bash
 git clone https://github.com/<your-username>/<your-repo>.git
 cd <your-repo>
 ```
 
-### 2️⃣ Backend Setup
+### Backend Setup
 
 ```bash
 cd backend
@@ -79,7 +79,7 @@ Run the backend:
 uvicorn main:app --reload
 ```
 
-### 3️⃣ Frontend Setup
+### Frontend Setup
 
 ```bash
 cd ../frontend
