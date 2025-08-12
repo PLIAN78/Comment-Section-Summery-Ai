@@ -89,7 +89,7 @@ npm run dev
 
 ---
 
-## ⚙️ How It Works
+##  How It Works
 
 1. User enters a YouTube video URL in the frontend.
 2. Frontend sends the URL to the backend via an API request.
