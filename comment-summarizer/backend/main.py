@@ -20,18 +20,18 @@ app = FastAPI()
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",      
-        "https://plian78.github.io"    
+        "http://localhost:5173",
+        "https://plian78.github.io",
+        "https://comment-section-summery-ai.onrender.com"
     ],
-    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Initialize Gemini
 if GEMINI_API_KEY:
