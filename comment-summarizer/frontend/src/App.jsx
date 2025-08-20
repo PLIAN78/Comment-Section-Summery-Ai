@@ -9,32 +9,40 @@ function App() {
   const [error, setError] = useState("")
 
   const fetchComments = async () => {
-    if (!videoId.trim()) {
-      setError("Please enter a YouTube URL or Video ID")
-      return
-    }
-
-    setLoading(true)
-    setError("")
-    setData(null)
-
-    try {
-      const encodedUrl = encodeURIComponent(videoId)
-      const res = await fetch(`https://comment-section-summery-ai.onrender.com/comments?video_id=${encodedUrl}`)
-      const responseData = await res.json()
-
-      if (responseData.status === "error") {
-        setError(responseData.error || "Failed to fetch comments")
-      } else {
-        setData(responseData)
-      }
-    } catch (err) {
-      console.error("Error fetching comments:", err)
-      setError("Network error. Make sure your backend is running.")
-    } finally {
-      setLoading(false)
-    }
+  if (!videoId.trim()) {
+    setError("Please enter a YouTube URL or Video ID");
+    return;
   }
+
+  setLoading(true);
+  setError("");
+  setData(null);
+
+  try {
+    const res = await fetch(`https://comment-section-summery-ai.onrender.com/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        video_url: videoId,  
+        max_comments: 50
+      }),
+    });
+
+    const responseData = await res.json();
+
+    if (responseData.status === "error") {
+      setError(responseData.error || "Failed to fetch comments");
+    } else {
+      setData(responseData);
+    }
+  } catch (err) {
+    console.error("Error fetching comments:", err);
+    setError("Network error. Make sure your backend is running.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
