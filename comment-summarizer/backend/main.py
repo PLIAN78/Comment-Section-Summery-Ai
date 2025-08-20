@@ -23,7 +23,11 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (update for production)
+    allow_origins=[
+        "http://localhost:5173",      
+        "https://plian78.github.io"    
+    ],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

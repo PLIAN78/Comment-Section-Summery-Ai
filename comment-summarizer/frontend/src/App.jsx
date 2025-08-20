@@ -20,7 +20,7 @@ function App() {
 
     try {
       const encodedUrl = encodeURIComponent(videoId)
-      const res = await fetch(`http://127.0.0.1:8000/comments?video_id=${encodedUrl}`)
+      const res = await fetch(`https://comment-section-summery-ai.onrender.com/comments?video_id=${encodedUrl}`)
       const responseData = await res.json()
 
       if (responseData.status === "error") {
