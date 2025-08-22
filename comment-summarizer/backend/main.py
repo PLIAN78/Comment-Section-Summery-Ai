@@ -13,7 +13,7 @@ from typing import List, Dict
 from collections import Counter
 import re
 
-# Load environment variables
+# load environment variables
 load_dotenv()
 
 app = FastAPI()
@@ -40,7 +40,7 @@ if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 
-# ---------------- Utility Functions ---------------- #
+
 
 def extract_video_id(url: str) -> str:
     """Extract YouTube video ID from various formats"""
@@ -73,7 +73,7 @@ def clean_comment_text(text: str) -> str:
     return text
 
 
-# ---------------- AI Functions ---------------- #
+# Aifuction
 
 def analyze_with_gemini(comments: List[Dict]) -> Dict:
     """Send comments to Gemini for categorization + sentiment + summary"""
@@ -123,7 +123,7 @@ Respond ONLY in JSON format:
             "summary": "Error generating analysis with Gemini.",
         }
 
-# ---------------- API Routes ---------------- #
+# API Routes 
 
 class VideoRequest(BaseModel):
     video_url: str
@@ -144,7 +144,7 @@ def get_comments_post(request: VideoRequest):
 
 
 def fetch_comments(video_id: str, max_comments: int = 200):
- 
+
 
     if not YOUTUBE_API_KEY:
         return {"status": "error", "error": "YouTube API key not found"}
@@ -184,30 +184,44 @@ def fetch_comments(video_id: str, max_comments: int = 200):
             if not next_page_token:
                 break
 
-        # Analyze with Gemini
-        analysis = analyze_with_gemini(comments)
+        # Try analyzing with Gemini
+        analysis = {}
+        try:
+            analysis = analyze_with_gemini(comments)
+        except Exception as e:
+            import traceback
+            print("Gemini analysis failed:", e)
+            print(traceback.format_exc())
+            # fallback so frontend still works
+            analysis = {
+                "categories": {},
+                "sentiment": {},
+                "summary": "⚠️ Gemini analysis failed. Showing raw comments only."
+            }
 
+  
         ai_summary = analysis.get("summary", "")
 
         comments_by_category = {
             cat: [
                 c for i, c in enumerate(comments)
-                if str(i+1) in analysis.get("categories", {}) 
+                if str(i+1) in analysis.get("categories", {})
                 and analysis["categories"][str(i+1)] == cat
             ]
             for cat in ["Regular", "Questions", "Requests", "Concerning"]
         }
 
      
+        from collections import Counter
+        import re
         all_text = " ".join(c["text"] for c in comments)
-        words = re.findall(r"\b[a-zA-Z]{3,}\b", all_text.lower())  # words ≥3 letters
-        stopwords = {
-            "the","and","for","that","with","this","you","have","but","not","are","was","from",
-            "they","your","just","what","all","about","can","will","out","get","has","one","like"
-        }
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", all_text.lower())
+        stopwords = {"the","and","for","that","with","this","you","have","but","not","are",
+                     "was","from","they","your","just","what","all","about","can","will",
+                     "out","get","has","one","like"}
         filtered = [w for w in words if w not in stopwords]
         freq = Counter(filtered)
-        top_keywords = freq.most_common(10)  # top 10 keywords with counts
+        top_keywords = freq.most_common(10)
 
         return {
             "video_id": video_id,
@@ -217,7 +231,8 @@ def fetch_comments(video_id: str, max_comments: int = 200):
             "analysis": {
                 "sentiment": analysis.get("sentiment", {}),
                 "top_keywords": top_keywords
-            }
+            },
+            "raw_comments": comments  
         }
 
     except Exception as e:
