@@ -645,6 +645,25 @@ function App() {
     </PieChart>
   </div>
 )}
+        {/* Fallback: show raw comments if no categories available */}
+{data?.raw_comments && (!data.comments_by_category || 
+  Object.values(data.comments_by_category).every(arr => arr.length === 0)) && (
+  <div className="topics-section">
+    <h3> All Comments (Uncategorized)</h3>
+    <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+      {data.raw_comments.map((comment, idx) => (
+        <div key={idx} className="comment-item">
+          <div className="comment-author">👤 {comment.author}</div>
+          <div className="comment-meta">
+            <span> {comment.likes}</span>
+            <span> {new Date(comment.published).toLocaleDateString()}</span>
+          </div>
+          <div className="comment-text">{comment.text}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* About Section */}
         <div className="about-section">
