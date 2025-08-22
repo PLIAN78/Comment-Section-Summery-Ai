@@ -142,10 +142,29 @@ def get_comments_post(request: VideoRequest):
 
     return fetch_comments(video_id, request.max_comments)
 
+def categorize_comments(comments):
+    categories = {
+        "Questions": [],
+        "Requests": [],
+        "Concerning": [],
+        "Regular": []
+    }
+
+    for c in comments:
+        text = c["text"].lower()
+
+        if "?" in text or any(word in text for word in ["how", "what", "why", "when", "where"]):
+            categories["Questions"].append(c)
+        elif any(word in text for word in ["please", "can you", "could you", "request", "suggest"]):
+            categories["Requests"].append(c)
+        elif any(word in text for word in ["bad", "hate", "problem", "issue", "concern", "worry", "danger"]):
+            categories["Concerning"].append(c)
+        else:
+            categories["Regular"].append(c)
+
+    return categories
 
 def fetch_comments(video_id: str, max_comments: int = 200):
-
-
     if not YOUTUBE_API_KEY:
         return {"status": "error", "error": "YouTube API key not found"}
 
@@ -184,7 +203,7 @@ def fetch_comments(video_id: str, max_comments: int = 200):
             if not next_page_token:
                 break
 
-        # Try analyzing with Gemini
+        #  Try analyzing with Gemini 
         analysis = {}
         try:
             analysis = analyze_with_gemini(comments)
@@ -192,37 +211,53 @@ def fetch_comments(video_id: str, max_comments: int = 200):
             import traceback
             print("Gemini analysis failed:", e)
             print(traceback.format_exc())
-            # fallback so frontend still works
             analysis = {
                 "categories": {},
                 "sentiment": {},
-                "summary": "⚠️ Gemini analysis failed. Showing raw comments only."
+                "summary": "⚠️ Gemini analysis failed."
             }
 
-  
-        ai_summary = analysis.get("summary", "")
+        #  Categorization 
+        if analysis.get("categories"):  # AI-based
+            comments_by_category = {
+                cat: [
+                    c for i, c in enumerate(comments)
+                    if str(i+1) in analysis.get("categories", {})
+                    and analysis["categories"][str(i+1)] == cat
+                ]
+                for cat in ["Regular", "Questions", "Requests", "Concerning"]
+            }
+        else:  # Rule-based fallback
+            comments_by_category = categorize_comments(comments)
 
-        comments_by_category = {
-            cat: [
-                c for i, c in enumerate(comments)
-                if str(i+1) in analysis.get("categories", {})
-                and analysis["categories"][str(i+1)] == cat
-            ]
-            for cat in ["Regular", "Questions", "Requests", "Concerning"]
-        }
-
-     
+        #  Keyword extraction 
         from collections import Counter
         import re
         all_text = " ".join(c["text"] for c in comments)
         words = re.findall(r"\b[a-zA-Z]{3,}\b", all_text.lower())
-        stopwords = {"the","and","for","that","with","this","you","have","but","not","are",
-                     "was","from","they","your","just","what","all","about","can","will",
-                     "out","get","has","one","like"}
+        stopwords = {
+            "the","and","for","that","with","this","you","have","but","not","are",
+            "was","from","they","your","just","what","all","about","can","will",
+            "out","get","has","one","like"
+        }
         filtered = [w for w in words if w not in stopwords]
         freq = Counter(filtered)
         top_keywords = freq.most_common(10)
 
+        # fallback
+        ai_summary = analysis.get("summary", "")
+        if not ai_summary or "Error" in ai_summary or "⚠️" in ai_summary:
+            if top_keywords:
+                top_words = ", ".join([kw for kw, _ in top_keywords[:5]])
+                ai_summary = (
+                    f"Viewers are actively discussing topics like {top_words}. "
+                    f"Engagement shows a mix of questions, requests, "
+                    f"concerns, and regular feedback."
+                )
+            else:
+                ai_summary = "Viewers are engaging with this video, leaving a mix of questions, feedback, and reactions."
+
+        # Final return 
         return {
             "video_id": video_id,
             "total_comments": len(comments),
@@ -232,7 +267,7 @@ def fetch_comments(video_id: str, max_comments: int = 200):
                 "sentiment": analysis.get("sentiment", {}),
                 "top_keywords": top_keywords
             },
-            "raw_comments": comments  
+            "raw_comments": comments
         }
 
     except Exception as e:

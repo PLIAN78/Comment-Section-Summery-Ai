@@ -55,9 +55,9 @@ function App() {
   const getCategoryInfo = (category) => {
     const info = {
       Regular: {  color: "#28a745", label: "General Engagement" },
-      Questions: { icon: "❓", color: "#007bff", label: "Audience Questions" },
-      Requests: { icon: "🙋", color: "#ffc107", label: "Requests & Suggestions" },
-      Concerning: { icon: "⚠️", color: "#dc3545", label: "Concerning Feedback" },
+      Questions: { icon: "", color: "#007bff", label: "Audience Questions" },
+      Requests: { icon: "", color: "#ffc107", label: "Requests & Suggestions" },
+      Concerning: { icon: "", color: "#dc3545", label: "Concerning Feedback" },
     }
     return info[category] || { icon: "📝", color: "#6c757d", label: "Other" }
   }
