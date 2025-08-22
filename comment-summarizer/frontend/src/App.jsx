@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts"
 
 function App() {
   const [videoId, setVideoId] = useState("")
@@ -610,6 +611,40 @@ function App() {
             </div>
           </div>
         )}
+          {/* Audience Sentiment Section */}
+{data?.analysis?.sentiment && Object.keys(data.analysis.sentiment).length > 0 && (
+  <div className="topics-section">
+    <h3>📊 Audience Sentiment</h3>
+    <PieChart width={400} height={300}>
+      <Pie
+        data={Object.entries(data.analysis.sentiment).map(([key, value]) => ({
+          name: key,
+          value: value,
+        }))}
+        cx="50%"
+        cy="50%"
+        outerRadius={100}
+        dataKey="value"
+        label
+      >
+        {Object.entries(data.analysis.sentiment).map(([key], index) => (
+          <Cell
+            key={`cell-${index}`}
+            fill={
+              key === "Positive"
+                ? "#28a745" // green
+                : key === "Negative"
+                ? "#dc3545" // red
+                : "#ffc107" // yellow for Neutral
+            }
+          />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
+  </div>
+)}
 
         {/* About Section */}
         <div className="about-section">

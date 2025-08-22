@@ -10,6 +10,8 @@ import re
 import google.generativeai as genai
 import json
 from typing import List, Dict
+from collections import Counter
+import re
 
 # Load environment variables
 load_dotenv()
@@ -142,10 +144,10 @@ def get_comments_post(request: VideoRequest):
 
 
 def fetch_comments(video_id: str, max_comments: int = 200):
-    """Fetch YouTube comments with pagination and analyze with Gemini"""
+ 
 
     if not YOUTUBE_API_KEY:
-        return {"error": "YouTube API key not found"}
+        return {"status": "error", "error": "YouTube API key not found"}
 
     try:
         youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
@@ -185,12 +187,41 @@ def fetch_comments(video_id: str, max_comments: int = 200):
         # Analyze with Gemini
         analysis = analyze_with_gemini(comments)
 
+        ai_summary = analysis.get("summary", "")
+
+        comments_by_category = {
+            cat: [
+                c for i, c in enumerate(comments)
+                if str(i+1) in analysis.get("categories", {}) 
+                and analysis["categories"][str(i+1)] == cat
+            ]
+            for cat in ["Regular", "Questions", "Requests", "Concerning"]
+        }
+
+     
+        all_text = " ".join(c["text"] for c in comments)
+        words = re.findall(r"\b[a-zA-Z]{3,}\b", all_text.lower())  # words ≥3 letters
+        stopwords = {
+            "the","and","for","that","with","this","you","have","but","not","are","was","from",
+            "they","your","just","what","all","about","can","will","out","get","has","one","like"
+        }
+        filtered = [w for w in words if w not in stopwords]
+        freq = Counter(filtered)
+        top_keywords = freq.most_common(10)  # top 10 keywords with counts
+
         return {
             "video_id": video_id,
             "total_comments": len(comments),
-            "comments": comments,
-            "analysis": analysis,
+            "ai_summary": ai_summary,
+            "comments_by_category": comments_by_category,
+            "analysis": {
+                "sentiment": analysis.get("sentiment", {}),
+                "top_keywords": top_keywords
+            }
         }
 
     except Exception as e:
-        return {"error": f"Failed to fetch comments: {str(e)}"}
+        import traceback
+        print("Error:", e)
+        print(traceback.format_exc())
+        return {"status": "error", "error": f"Failed to fetch comments: {str(e)}"}
