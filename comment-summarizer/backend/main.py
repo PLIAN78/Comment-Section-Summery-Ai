@@ -27,6 +27,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://plian78.github.io",
+        "https://knowyoufans.live",
         "https://comment-section-summery-ai.onrender.com"
     ],
     allow_credentials=True,
