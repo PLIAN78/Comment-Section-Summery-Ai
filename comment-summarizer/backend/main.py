@@ -25,16 +25,17 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "https://plian78.github.io",
-        "https://knowyoufans.live",
-        "https://comment-section-summery-ai.onrender.com"
+        "*"
+        # "http://localhost:5173",
+        # "https://plian78.github.io",           # Original GitHub Pages
+        # "https://plian78.github.io/KnowYouFans",  # Full GitHub Pages path
+        # "https://knowyoufans.live",            # Your custom domain
+        # "https://www.knowyoufans.live",        # Include www version
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Initialize Gemini
 if GEMINI_API_KEY:

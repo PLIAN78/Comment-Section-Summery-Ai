@@ -19,16 +19,20 @@ function App() {
   setError("");
   setData(null);
 
-  try {
+try {
+    console.log('Making request to:', `https://comment-section-summery-ai.onrender.com/comments`);
     const res = await fetch(`https://comment-section-summery-ai.onrender.com/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        video_url: videoId,  
-        max_comments: 50
-      }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            video_url: videoId,  
+            max_comments: 50
+        }),
     });
-
+    
+    console.log('Response status:', res.status);
+    console.log('Response headers:', [...res.headers.entries()]);
+    
     const responseData = await res.json();
 
     if (responseData.status === "error") {
